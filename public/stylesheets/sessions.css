@@ -125,5 +125,6 @@ input[type='password'] {
 #message {
   width: 500px;
   border: 2px solid black;
-}
+  padding: 1px;
+  margin-top: 5px; }
   #message.warning {}
