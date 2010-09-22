@@ -121,3 +121,9 @@ input[type='password'] {
     width: 200px;
     display: inline;
     font-size: 18px; }
+
+#message {
+  width: 500px;
+  border: 2px solid black;
+}
+  #message.warning {}
