@@ -25,8 +25,6 @@ class User
   key :visible_post_ids,    Array
   key :visible_person_ids,  Array
 
-  key :url, String
-
   one :person, :class_name => 'Person', :foreign_key => :owner_id
 
   many :friends,           :in => :friend_ids,          :class_name => 'Person'
@@ -97,7 +95,6 @@ class User
 
   ######## Posting ########
   def post(class_name, options = {})
-
     if class_name == :photo
       raise ArgumentError.new("No album_id given") unless options[:album_id]
       aspect_ids = aspects_with_post( options[:album_id] )
@@ -106,18 +103,39 @@ class User
       aspect_ids = options.delete(:to)
     end
 
-    aspect_ids = [aspect_ids.to_s] if aspect_ids.is_a? BSON::ObjectId
+    aspect_ids = validate_aspect_permissions(aspect_ids)
 
-    raise ArgumentError.new("You must post to someone.") if aspect_ids.nil? || aspect_ids.empty?
-    aspect_ids.each{ |aspect_id|
-      raise ArgumentError.new("Cannot post to an aspect you do not own.") unless aspect_id == "all" || self.aspects.find(aspect_id) }
+    intitial_post(class_name, aspect_ids, options)
+  end
 
+
+  def intitial_post(class_name, aspect_ids, options = {}) 
     post = build_post(class_name, options)
-
     post.socket_to_uid(id, :aspect_ids => aspect_ids) if post.respond_to?(:socket_to_uid)
     push_to_aspects(post, aspect_ids)
+    post 
+  end
 
+  def repost( post, options = {} )
+    aspect_ids = validate_aspect_permissions(options[:to])
+    push_to_aspects(post, aspect_ids)
     post
+  end
+
+  def validate_aspect_permissions(aspect_ids)
+    aspect_ids = [aspect_ids.to_s] if aspect_ids.is_a? BSON::ObjectId
+
+    if aspect_ids.nil? || aspect_ids.empty?
+      raise ArgumentError.new("You must post to someone.")
+    end
+
+    aspect_ids.each do |aspect_id|
+      unless aspect_id == "all" || self.aspects.find(aspect_id) 
+        raise ArgumentError.new("Cannot post to an aspect you do not own.")
+      end 
+    end
+
+    aspect_ids
   end
 
   def build_post( class_name, options = {})
@@ -224,11 +242,8 @@ class User
 
   ###Helpers############
   def self.instantiate!( opts = {} )
-    hostname = opts[:url].gsub(/(https?:|www\.)\/\//, '')
-    hostname.chop! if hostname[-1, 1] == '/'
-    
-    opts[:person][:diaspora_handle] = "#{opts[:username]}@#{hostname}"
-    puts opts[:person][:diaspora_handle]
+    opts[:person][:diaspora_handle] = "#{opts[:username]}@#{APP_CONFIG[:terse_pod_url]}"
+    opts[:person][:url] = APP_CONFIG[:pod_url]
     opts[:person][:serialized_key] = generate_key
     User.create(opts)
   end
@@ -239,7 +254,7 @@ class User
   end
   
   def terse_url
-    terse = self.url.gsub(/(https?:|www\.)\/\//, '')
+    terse = APP_CONFIG[:pod_url].gsub(/(https?:|www\.)\/\//, '')
     terse = terse.chop! if terse[-1, 1] == '/'
     terse
   end
