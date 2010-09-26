@@ -2,7 +2,6 @@
 #   licensed under the Affero General Public License version 3.  See
 #   the COPYRIGHT file.
 
-
 class RequestsController < ApplicationController
   before_filter :authenticate_user!
   include RequestsHelper
@@ -42,6 +41,7 @@ class RequestsController < ApplicationController
       return
     end
 
+    # rel_hash = {:friend => params[:friend_handle]}
     Rails.logger.debug("Sending request: #{rel_hash}")
 
     begin
