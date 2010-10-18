@@ -1,5 +1,5 @@
 #   Copyright (c) 2010, Diaspora Inc.  This file is
-#   licensed under the Affero General Public License version 3.  See
+#   licensed under the Affero General Public License version 3 or later.  See
 #   the COPYRIGHT file.
 
 class PhotosController < ApplicationController
@@ -9,7 +9,8 @@ class PhotosController < ApplicationController
   respond_to :json, :only => :show
 
   def create
-    album = Album.find_by_id params[:album_id]
+    album = current_user.find_visible_post_by_id( params[:album_id] )
+
     begin
 
       ######################## dealing with local files #############
@@ -75,8 +76,12 @@ class PhotosController < ApplicationController
 
   def show
     @photo = current_user.find_visible_post_by_id params[:id]
-    @album = @photo.album
-    respond_with @photo, @album
+    unless @photo
+      render :file => "#{Rails.root}/public/404.html", :layout => false, :status => 404
+    else
+      @album = @photo.album
+      respond_with @photo, @album
+    end
   end
 
   def edit

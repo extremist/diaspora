@@ -7,7 +7,7 @@ namespace :generate do
   File.open(path, 'w') do |f|
     f.write <<"EOF"
 #   Copyright (c) 2010, Diaspora Inc.  This file is
-#   licensed under the Affero General Public License version 3.  See
+#   licensed under the Affero General Public License version 3 or later.  See
 #   the COPYRIGHT file.
 
 # Be sure to restart your server when you modify this file.
@@ -19,7 +19,6 @@ namespace :generate do
 Rails.application.config.secret_token = '#{secret}'
 EOF
 
-puts "YAY!!"
 end
 
   end

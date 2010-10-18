@@ -1,5 +1,5 @@
 #   Copyright (c) 2010, Diaspora Inc.  This file is
-#   licensed under the Affero General Public License version 3.  See
+#   licensed under the Affero General Public License version 3 or later.  See
 #   the COPYRIGHT file.
 #   Translated to Hebrew by Yaron Shahrabani <sh.yaron@gmail.com>, 2010.
 
@@ -18,7 +18,7 @@ he:
       invalid: "הססמה או הדוא״ל שגויים."
       invalid_token: "אסימון האימות שגוי."
       timeout: "ההפעלה שלך פגה, נא להיכנס שוב כדי להמשיך."
-      inactive: "חשבונך לא הופעל עדין."
+      inactive: "חשבונך לא הופעל עדיין."
     sessions:
       signed_in: "נכנסת בהצלחה."
       signed_out: "יצאת בהצלחה."

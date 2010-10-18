@@ -1,5 +1,5 @@
 #   Copyright (c) 2010, Diaspora Inc.  This file is
-#   licensed under the Affero General Public License version 3.  See
+#   licensed under the Affero General Public License version 3 or later.  See
 #   the COPYRIGHT file.
 
 require 'spec_helper'
@@ -43,6 +43,7 @@ describe Person do
 
     it 'should have a profile in its xml' do
       @xml.include?("first_name").should == true
+
     end
   end
 
@@ -54,7 +55,7 @@ describe Person do
     person_two.owns?(person_message).should be false
   end
 
-  it 'should delete all of user except comments upon user deletion' do
+  it 'should delete all of user posts except comments upon user deletion' do
     person = Factory.create(:person)
 
     Factory.create(:status_message, :person => person)
@@ -115,7 +116,7 @@ describe Person do
     end
   end
 
-  describe 'searching' do
+  describe '::search' do
     before do
       @friend_one   = Factory.create(:person)
       @friend_two   = Factory.create(:person)
@@ -159,28 +160,35 @@ describe Person do
       people.include?(@friend_three).should == false
     end
 
-    it 'should search by diaspora_handle exactly' do
-      stub_success("tom@tom.joindiaspora.com")
-      Person.by_webfinger(@friend_one.diaspora_handle).should == @friend_one
+    it 'should yield results on full names' do
+      people = Person.search("Casey Grippi")
+      people.should == [@friend_four]
+    end
+  end
+
+  describe ".by_webfinger" do
+    context "local people" do
+      before do
+        @local_person = Factory(:person)
+        Redfinger.should_not_receive :finger
+      end
+
+      it "finds the local person without calling out" do
+        person = Person.by_webfinger(@local_person.diaspora_handle)
+        person.should == @local_person
+      end
+
+      it "finds a local person with a mixed-case username" do
+        user = Factory(:user, :username => "SaMaNtHa")
+        person = Person.by_webfinger(user.person.diaspora_handle)
+        person.should == user.person
+      end
     end
 
-    it 'should create a stub for a remote user' do
+    it 'creates a stub for a remote user' do
       stub_success("tom@tom.joindiaspora.com")
       tom = Person.by_webfinger('tom@tom.joindiaspora.com')
       tom.real_name.include?("Hamiltom").should be true
     end
-
-    describe 'wall posting' do
-      it 'should be able to post on another persons wall' do
-        pending
-        #user2 is in user's aspect, user is in aspect2 on user
-        friend_users(@user, @aspect, @user2, @aspect2)
-
-        @user.person.post_to_wall(:person => @user2.person, :message => "youve got a great smile")
-        @user.person.wall_posts.count.should == 1
-
-      end
-    end
-
   end
 end

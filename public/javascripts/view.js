@@ -1,5 +1,5 @@
 /*   Copyright (c) 2010, Diaspora Inc.  This file is
-*   licensed under the Affero General Public License version 3.  See
+*   licensed under the Affero General Public License version 3 or later.  See
 *   the COPYRIGHT file.
 */
 
@@ -12,7 +12,11 @@ $(document).ready(function(){
 
   $("label").inFieldLabels();
 
-  $('#flash_notice, #flash_error, #flash_alert').delay(2500).slideUp(130);
+  $('#flash_notice, #flash_error, #flash_alert').animate({
+    top: 0
+  }).delay(4000).animate({
+    top: -100 
+  }, $(this).remove());
 
   $("div.image_cycle").cycle({
     fx: 'fade',
@@ -22,9 +26,11 @@ $(document).ready(function(){
   });
 
   //buttons//////
-  $("#add_aspect_button").fancybox({ 'titleShow' : false });
-  $("#add_request_button").fancybox({ 'titleShow': false });
-  $(".add_request_button").fancybox({ 'titleShow': false });
+  $("#add_aspect_button").fancybox({ 'titleShow' : false , 'hideOnOverlayClick' : false });
+  $("#add_request_button").fancybox({ 'titleShow': false , 'hideOnOverlayClick' : false });
+  $(".invite_user_button").fancybox({ 'titleShow': false , 'hideOnOverlayClick' : false });
+  $(".add_request_button").fancybox({ 'titleShow': false , 'hideOnOverlayClick' : false });
+  $(".question_mark").fancybox({ 'titleShow': false , 'hideOnOverlayClick' : false });
 
   $("input[type='submit']").addClass("button");
 
@@ -41,9 +47,9 @@ $(document).ready(function(){
     }
   );
 
-  $("#publisher textarea").keydown( function(e) {
-    if (e.shiftKey && e.keyCode == 13) {
-      $("#publisher form").submit();
+  $("#publisher textarea, .comment textarea").keydown( function(e) {
+    if (e.keyCode == 13) {
+      $(this).closest("form").submit();
     }
   });
 
@@ -58,11 +64,29 @@ $.fn.clearForm = function() {
     return $(':input',this).clearForm();
   if (type == 'text' || type == 'password' || tag == 'textarea')
     this.value = '';
-  //else if (type == 'checkbox' || type == 'radio')
-    //this.checked = false;
+  else if (type == 'checkbox' || type == 'radio')
+    this.checked = false;
   else if (tag == 'select')
     this.selectedIndex = -1;
   $(this).blur();
   });
 };
 
+var video_active_container = null;
+
+function openVideo(type, videoid, link) {
+  var container = document.createElement('div');
+  if(type == 'youtube.com') {
+    container.innerHTML = '<a href="http://www.youtube.com/watch?v='+videoid+'" target="_blank">Watch this video on Youtube</a><br><object width="640" height="385"><param name="movie" value="http://www.youtube.com/v/'+videoid+'?fs=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+videoid+'?fs=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>';
+  } else {
+    container.innerHTML = 'Invalid videotype <i>'+type+'</i> (ID: '+videoid+')';
+  }
+  if(video_active_container != null) {
+    video_active_container.parentNode.removeChild(video_active_container);
+  }
+  video_active_container = container;
+  $(container).hide();
+  link.parentNode.insertBefore(container, this.nextSibling);
+  $(container).slideDown('fast', function() { });
+  link.onclick = function() { $(container).slideToggle('fast', function() { } ); }
+}

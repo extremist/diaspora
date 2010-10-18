@@ -1,5 +1,5 @@
 -#   Copyright (c) 2010, Diaspora Inc.  This file is
--#   licensed under the Affero General Public License version 3.  See
+-#   licensed under the Affero General Public License version 3 or later.  See
 -#   the COPYRIGHT file.
 
 - content_for :head do
@@ -8,19 +8,13 @@
       $("#add_album_button").fancybox();
     });
 
-= content_for :page_title do
-  = link_to "◂ #{t('.home')}", aspects_path, :aspect => params[:aspect]
-
 - content_for :left_pane do
   = render "shared/aspect_friends"
 
-- content_for :publish do
-  %h1
-    Albums
-  .right
-    = link_to t('.new_album'), '#new_album_pane', {:class => "button", :id => "add_album_button"}
+%h3 Albums
+= link_to t('.new_album'), '#new_album_pane', {:class => "button", :id => "add_album_button"}
 
-.yo{:style => "display:none;" }
+.fancybox_content
   #new_album_pane
     = render "albums/new_album", :aspect => params[:aspect]
 
@@ -31,6 +25,3 @@
 #pagination
   = will_paginate @albums
 
-#content_bottom
-  .back
-    = link_to "⇧ #{t('.home')}", root_path

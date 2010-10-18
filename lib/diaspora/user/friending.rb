@@ -1,5 +1,5 @@
 #   Copyright (c) 2010, Diaspora Inc.  This file is
-#   licensed under the Affero General Public License version 3.  See
+#   licensed under the Affero General Public License version 3 or later.  See
 #   the COPYRIGHT file.
 
 module Diaspora
@@ -7,6 +7,7 @@ module Diaspora
     module Friending
       def send_friend_request_to(desired_friend, aspect)
         # should have different exception types for these?
+        raise "You cannot befriend yourself" if desired_friend.nil? 
         raise "You have already sent a friend request to that person!" if self.pending_requests.detect{
           |x| x.destination_url == desired_friend.receive_url }
         raise "You are already friends with that person!" if self.friends.detect{
@@ -22,7 +23,7 @@ module Diaspora
           aspect.requests << request
           aspect.save
 
-          salmon request, :to => desired_friend
+          push_to_people request, [desired_friend]
         end
         request
       end
@@ -38,7 +39,8 @@ module Diaspora
       end
 
       def dispatch_friend_acceptance(request, requester)
-        salmon request, :to => requester
+        friend_acceptance = salmon(request)
+        push_to_person requester, friend_acceptance.xml_for(requester)
         request.destroy unless request.callback_url.include? url
       end
 
@@ -80,7 +82,7 @@ module Diaspora
       def unfriend(bad_friend)
         Rails.logger.info("#{self.real_name} is unfriending #{bad_friend.inspect}")
         retraction = Retraction.for(self)
-        salmon( retraction, :to => bad_friend)
+        push_to_people retraction, [bad_friend]
         remove_friend(bad_friend)
       end
 
@@ -113,7 +115,11 @@ module Diaspora
       end
 
       def request_from_me?(request)
-        pending_requests.detect{|req| (req.callback_url == person.receive_url) && (req.destination_url == person.receive_url)}
+        (pending_request_ids.include?(request.id.to_id)) && (request.callback_url == person.receive_url) 
+      end
+
+      def requests_for_me
+        pending_requests.select{|req| req.person != self.person }
       end
     end
   end

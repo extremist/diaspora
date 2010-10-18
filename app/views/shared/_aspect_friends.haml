@@ -1,23 +1,36 @@
 -#   Copyright (c) 2010, Diaspora Inc.  This file is
--#   licensed under the Affero General Public License version 3.  See
+-#   licensed under the Affero General Public License version 3 or later.  See
 -#   the COPYRIGHT file.
 
-#friend_pictures
-  = owner_image_link
-  - for friend in @friends
-    = person_image_link(friend)
+
+#left_pane
+  %h2= @aspect
+  #friend_pictures
+    = owner_image_link
+    - for friend in @friends
+      = person_image_link(friend)
     - if @logged_in && (@aspect == :public)
       %h3 Facebook Friends
-      - @fb_friends = MiniFB.get(@access_token, 'me', :type => "friends")                                                                                            
-      - @fb_friends[:data].each do |friend|            
+      - @fb_friends = MiniFB.get(@access_token, 'me', :type => "friends")
+      - @fb_friends[:data].each do |friend|
         = image_tag( "http://graph.facebook.com/#{friend[:id]}/picture" )
-  -unless (@aspect == :all) || (@aspect == :public)
-    = link_to (image_tag('add_friend_button.png', :height => "50px", :width => "50px")), "#add_request_pane", :id => 'add_request_button'
+    -unless (@aspect == :all)
+      = link_to (image_tag('add_friend_button.png', :height => "50px", :width => "50px")), "#add_request_pane", :id => 'add_request_button'
 
-    .yo{:style => 'display:none'}
-      #add_request_pane
-        = render "requests/new_request", :aspect => @aspect
-  -else
-    .clear
-      = link_to t('.add_friends'), aspects_manage_path
+      .fancybox_content
+        #add_request_pane
+          = render "requests/new_request", :aspect => @aspect
+    -else
+      .clear
+        %br
+        = link_to t('.add_friends'), aspects_manage_path
 
+  %br
+  %br
+  %ul
+    %li= link_to 'stream', aspect_path(@aspect)
+    %li= link_to t('.photos'), albums_path(:aspect => @aspect)
+
+  %br
+
+  = render "shared/invitations", :invites => @invites

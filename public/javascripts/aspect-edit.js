@@ -1,5 +1,5 @@
 /*   Copyright (c) 2010, Diaspora Inc.  This file is
-*   licensed under the Affero General Public License version 3.  See
+*   licensed under the Affero General Public License version 3 or later.  See
 *   the COPYRIGHT file.
 */
 
@@ -47,7 +47,7 @@ $(function() {
         var dropzone = $(this)[0];
 
         if ($(this)[0].id == ui.draggable[0].getAttribute('from_aspect_id')){
-          ui.draggable.css('background','none');
+          ui.draggable.css('background-color','#333');
         } else {
           ui.draggable.css('background-color','orange');
           $.ajax({
@@ -57,7 +57,7 @@ $(function() {
                    "to" : { "to" : dropzone.id }},
             success: function(data){
               ui.draggable.attr('from_aspect_id', dropzone.id);
-              ui.draggable.css('background','none');
+              ui.draggable.css('background-color','#333');
             }});
 
         }
@@ -94,7 +94,7 @@ $(function() {
   });
 
 
-  $(".aspect h1").live( 'focus', function() {
+  $(".aspect h3").live( 'focus', function() {
 
     var $this = $(this),
         id    = $this.closest("li").children("ul").attr("id"),

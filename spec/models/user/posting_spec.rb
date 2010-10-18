@@ -1,5 +1,5 @@
 #   Copyright (c) 2010, Diaspora Inc.  This file is
-#   licensed under the Affero General Public License version 3.  See
+#   licensed under the Affero General Public License version 3 or later.  See
 #   the COPYRIGHT file.
 
 require 'spec_helper'
@@ -44,6 +44,11 @@ describe User do
       aspect.reload
       aspect.posts.should include album
     end
+    it "should add the post to that user's visible posts" do
+      status_message = user.post :status_message, :message => "hi", :to => aspect.id
+      user.reload
+      user.raw_visible_posts.include?(status_message).should be true
+    end
   end
 
   describe '#update_post' do
@@ -71,19 +76,19 @@ describe User do
 
     describe '#push_to_aspects' do
       it 'should push a post to a aspect' do
-        user.should_receive(:salmon).twice
+        user.should_receive(:push_to_person).twice
         user.push_to_aspects(post, aspect.id)
       end
 
       it 'should push a post to all aspects' do
-        user.should_receive(:salmon).exactly(3).times
+        user.should_receive(:push_to_person).exactly(3).times
         user.push_to_aspects(post, :all)
       end
     end
 
     describe '#push_to_people' do
       it 'should push to people' do
-        user.should_receive(:salmon).twice
+        user.should_receive(:push_to_person).twice
         user.push_to_people(post, [user2.person, user3.person])
       end
     end

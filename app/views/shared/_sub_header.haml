@@ -1,15 +1,13 @@
 #aspect_header
   .container
-    .span-5.last
+    .span-4.last
       - if @person
-        %h1
+        %h2
           = @person.real_name
       - else
-        %h1
+        %h2
           - if @aspect == :all
-            = link_to t('.all_aspects'), root_path
-          - elsif @aspect == :public
-            = "Public"
+            = link_to "Everyone", root_path
           - elsif @aspect == :manage
             = link_to t('.manage_aspects'), root_path
           - else
@@ -18,5 +16,5 @@
       .page_title
         = yield :page_title
 
-    .span-19.last{ :style => "position:relative;" }
+    .span-15.last{ :style => "position:relative;" }
       = yield :publish

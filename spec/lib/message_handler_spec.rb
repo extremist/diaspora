@@ -1,5 +1,5 @@
 #   Copyright (c) 2010, Diaspora Inc.  This file is
-#   licensed under the Affero General Public License version 3.  See
+#   licensed under the Affero General Public License version 3 or later.  See
 #   the COPYRIGHT file.
 
 require 'spec_helper'
@@ -90,6 +90,26 @@ describe MessageHandler do
 
         EventMachine.stop
 
+      }
+    end
+  end
+
+  describe "Hub publish" do
+    it 'should correctly queue up a pubsubhubbub publish request' do
+      destination = "http://identi.ca/hub/"
+      feed_location = "http://google.com/"
+
+      EventMachine.run {
+        @handler.add_hub_notification(destination, feed_location)
+        q = @handler.instance_variable_get(:@queue)
+
+        message = ""
+        q.pop{|m| message = m}
+
+        message.destination.should == destination
+        message.body.should == feed_location
+
+        EventMachine.stop
       }
     end
   end
